@@ -89,6 +89,27 @@ app.get('/fetch-ops-value', (req, res) => {
         res.json(result);
     });
 });
+/** Fetch OPS value (ID 73) */
+app.get('/fetch-test-value', (req, res) => {
+  const query = `SELECT TypeValue FROM cake_vending_machine WHERE ID = 85`;
+  db.query(query, (err, result) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+      }
+      res.json(result);
+  });
+});
+// update test value to 0
+app.post('/reset-test-value', (req, res) => {
+  db.query(`UPDATE cake_vending_machine SET TypeValue = 1 WHERE ID = 85`, (err, result) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send('Internal Server Error');
+      }
+      res.send('OPS value reset to 0 successfully');
+  });
+});
 // update ops value to 0
 app.post('/reset-ops-value', (req, res) => {
     db.query(`UPDATE cake_vending_machine SET TypeValue = 0 WHERE ID = 73`, (err, result) => {

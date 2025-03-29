@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
 
 const StockReplenishmentScreen = () => {
@@ -13,6 +13,7 @@ const StockReplenishmentScreen = () => {
     }, []);
 
     const fetchAllData = async () => {
+        setLoading(true);
         try {
             const stockResponse = await axios.get('http://192.168.0.105:3000/fetch-stock');
             const expiryResponse = await axios.get('http://192.168.0.105:3000/fetch-expiry-dates');
@@ -21,11 +22,10 @@ const StockReplenishmentScreen = () => {
             setStockData(stockResponse.data);
             setExpiryData(expiryResponse.data);
             setNextStock(nextStockResponse.data);
-            setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
-            setLoading(false);
         }
+        setLoading(false);
     };
 
     if (loading) return <ActivityIndicator size="large" color="blue" />;
@@ -33,6 +33,9 @@ const StockReplenishmentScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Stock Replenishment</Text>
+            
+            {/* Refresh Button */}
+            <Button title="Refresh" onPress={fetchAllData} color="blue" />
 
             <View style={styles.headerRow}>
                 <Text style={styles.header}>P#</Text>

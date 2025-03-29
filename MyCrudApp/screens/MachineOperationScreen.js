@@ -12,7 +12,7 @@ const MachineOperationScreen = () => {
 
     const fetchOperationVariable = async () => {
         try {
-            const response = await axios.get('http://192.168.0.105:3000/fetch-operation-variable');
+            const response = await axios.get('http://192.168.0.105:3000/fetch-test-value');
             setOperationValue(response.data[0]?.TypeValue);
             setLoading(false);
         } catch (error) {

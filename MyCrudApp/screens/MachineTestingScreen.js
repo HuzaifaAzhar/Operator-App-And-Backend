@@ -28,6 +28,17 @@ const MachineTestingScreen = () => {
         }
     };
 
+    // Reset Operation value to zero with confirmation
+    const handleOperationResetToZero = async () => {
+        Alert.alert(
+            "Confirm Reset",
+            "Are you sure you want to reset Operation value to zero?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "OK", onPress: async () => resetOperation() }
+            ]
+        );
+    };
     // Reset OPS value to zero with confirmation
     const handleResetToZero = async () => {
         Alert.alert(
@@ -39,7 +50,37 @@ const MachineTestingScreen = () => {
             ]
         );
     };
+    //to handle both reset operations & reset ops value
+    const handleReset = async () => {
+        Alert.alert(
+            "Confirm Reset",
+            "Are you sure?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { 
+                    text: "OK", 
+                    onPress: async () => {
+                        await resetOPS();
+                        await resetOperation();
+                    }
+                }
+            ]
+        );
+    };    
 
+        // Actual API call for resetting OPS value
+        const resetOperation = async () => {
+            try {
+                setLoading(true);
+                await axios.post('http://192.168.0.105:3000/reset-test-value');
+                // fetchOPSValue(); // Refresh after reset
+            } catch (error) {
+                console.error("Error resetting Operation:", error);
+                Alert.alert("Error", "Failed to reset Operation.");
+            } finally {
+                setLoading(false);
+            }
+        };
     // Actual API call for resetting OPS value
     const resetOPS = async () => {
         try {
@@ -98,7 +139,13 @@ const MachineTestingScreen = () => {
 
             {/* Buttons Section */}
             <TouchableOpacity style={styles.button} onPress={handleResetToZero}>
-                <Text style={styles.buttonText}>Reset to Zero</Text>
+                <Text style={styles.buttonText}>Clear OPS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleOperationResetToZero}>
+                <Text style={styles.buttonText}>Reset Operation to 1</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleReset}>
+                <Text style={styles.buttonText}>Reset Operation to 1 & Clear OPS</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.buttonSecondary} onPress={() => Alert.alert("Moving Bowl")}>
