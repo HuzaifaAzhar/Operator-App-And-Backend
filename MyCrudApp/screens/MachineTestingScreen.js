@@ -1,24 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    View, Text, TextInput, Button, ActivityIndicator, 
+    View, Text, TextInput, ActivityIndicator, 
     StyleSheet, Alert, TouchableOpacity 
 } from 'react-native';
 import axios from 'axios';
+import DropDownPicker from 'react-native-dropdown-picker';
+
+const API_BASE_URL = 'http://192.168.100.119:3000';
 
 const MachineTestingScreen = () => {
     const [opsValue, setOpsValue] = useState(null);
     const [loading, setLoading] = useState(false);
     const [newOpsValue, setNewOpsValue] = useState(''); // User input for updating OPS
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [dropdownItems, setDropdownItems] = useState([]);
+    const [selectedVending, setSelectedVending] = useState(null);
 
     useEffect(() => {
-        fetchOPSValue();
+        fetchTableNames();
     }, []);
+
+    useEffect(() => {
+        if (selectedVending) {
+            fetchOPSValue();
+        }
+    }, [selectedVending]);
+
+    // Fetch table names for dropdown
+    const fetchTableNames = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/gettables`);
+            const tables = response.data;
+            const items = tables.map((table) => ({
+                label: table.replace(/_/g, ' '),
+                value: table.split('_').pop(),
+            }));
+            setDropdownItems(items);
+            if (items.length > 0) {
+                setSelectedVending(items[0].value);
+            }
+        } catch (error) {
+            console.error('Error fetching table names:', error);
+            Alert.alert("Error", "Failed to fetch vending machines.");
+        }
+    };
 
     // Fetch current OPS value
     const fetchOPSValue = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://192.168.0.105:3000/fetch-ops-value');
+            const response = await axios.get(`${API_BASE_URL}/fetch-ops-value?tableNumber=${selectedVending}`);
             setOpsValue(response.data[0]?.TypeValue || 0);
         } catch (error) {
             console.error("Error fetching OPS Value:", error);
@@ -28,17 +59,18 @@ const MachineTestingScreen = () => {
         }
     };
 
-    // Reset Operation value to zero with confirmation
+    // Reset Operation value to 1 with confirmation
     const handleOperationResetToZero = async () => {
         Alert.alert(
             "Confirm Reset",
-            "Are you sure you want to reset Operation value to zero?",
+            "Are you sure you want to reset Operation value to 1?",
             [
                 { text: "Cancel", style: "cancel" },
                 { text: "OK", onPress: async () => resetOperation() }
             ]
         );
     };
+
     // Reset OPS value to zero with confirmation
     const handleResetToZero = async () => {
         Alert.alert(
@@ -50,7 +82,8 @@ const MachineTestingScreen = () => {
             ]
         );
     };
-    //to handle both reset operations & reset ops value
+
+    // Handle both reset operations & reset OPS value
     const handleReset = async () => {
         Alert.alert(
             "Confirm Reset",
@@ -68,24 +101,25 @@ const MachineTestingScreen = () => {
         );
     };    
 
-        // Actual API call for resetting OPS value
-        const resetOperation = async () => {
-            try {
-                setLoading(true);
-                await axios.post('http://192.168.0.105:3000/reset-test-value');
-                // fetchOPSValue(); // Refresh after reset
-            } catch (error) {
-                console.error("Error resetting Operation:", error);
-                Alert.alert("Error", "Failed to reset Operation.");
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Actual API call for resetting Operation value
+    const resetOperation = async () => {
+        try {
+            setLoading(true);
+            await axios.post(`${API_BASE_URL}/reset-test-value?tableNumber=${selectedVending}`);
+            // fetchOPSValue(); // No need to refresh here as it affects ID 85, not ID 73
+        } catch (error) {
+            console.error("Error resetting Operation:", error);
+            Alert.alert("Error", "Failed to reset Operation.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Actual API call for resetting OPS value
     const resetOPS = async () => {
         try {
             setLoading(true);
-            await axios.post('http://192.168.0.105:3000/reset-ops-value');
+            await axios.post(`${API_BASE_URL}/reset-ops-value?tableNumber=${selectedVending}`);
             fetchOPSValue(); // Refresh after reset
         } catch (error) {
             console.error("Error resetting OPS:", error);
@@ -105,7 +139,7 @@ const MachineTestingScreen = () => {
 
         try {
             setLoading(true);
-            await axios.post('http://192.168.0.105:3000/update-ops-value', { value });
+            await axios.post(`${API_BASE_URL}/update-ops-value?tableNumber=${selectedVending}`, { value });
             setNewOpsValue(''); // Clear input after update
             fetchOPSValue(); // Refresh after update
         } catch (error) {
@@ -120,6 +154,18 @@ const MachineTestingScreen = () => {
 
     return (
         <View style={styles.container}>
+            <DropDownPicker
+                open={dropdownOpen}
+                value={selectedVending}
+                items={dropdownItems}
+                setOpen={setDropdownOpen}
+                setValue={setSelectedVending}
+                setItems={setDropdownItems}
+                placeholder="Select Vending Machine"
+                style={styles.dropdown}
+                containerStyle={{ marginBottom: 20 }}
+                dropDownContainerStyle={styles.dropDownContainer}
+            />
             <Text style={styles.title}>Machine Testing</Text>
             <Text style={styles.valueText}>OPS Value: <Text style={styles.boldText}>{opsValue}</Text></Text>
 
@@ -165,8 +211,15 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor: '#f4f4f4',
+    },
+    dropdown: {
+        borderColor: '#ccc',
+        width: '100%',
+    },
+    dropDownContainer: {
+        borderColor: '#ccc',
+        maxHeight: 150, // Limit dropdown height to prevent overflow
     },
     title: {
         fontSize: 24,
@@ -187,6 +240,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 15,
+        width: '100%',
     },
     input: {
         flex: 1,
@@ -210,6 +264,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 5,
         marginBottom: 10,
+        width: '100%',
+        alignItems: 'center',
     },
     buttonSecondary: {
         backgroundColor: '#007bff',
@@ -217,13 +273,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 5,
         marginTop: 10,
+        width: '100%',
+        alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
         fontWeight: 'bold',
     },
     loading: {
-        marginTop: 20,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

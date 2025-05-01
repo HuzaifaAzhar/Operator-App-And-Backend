@@ -17,7 +17,7 @@ const MachineOperationTesting = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://192.168.0.102:3000/fetch-operation-variable?vending=${selectedVending}`);
+      const response = await axios.get(`http://192.168.100.119:3000/fetch-operation-variable?vending=${selectedVending}`);
       setOperationVariable(response.data[0].TypeValue.toString());
       setEditableValue(''); // Reset editableValue when fetching new data
     } catch (error) {
@@ -30,7 +30,7 @@ const MachineOperationTesting = () => {
   const handleUpdate = async () => {
     try {
 
-      await axios.post(`http://192.168.0.102:3000/update-operation-variable`, { value: editableValue, vending: selectedVending });
+      await axios.post(`http://192.168.100.119:3000/update-operation-variable`, { value: editableValue, vending: selectedVending });
       setIsEditing(false);
       fetchData(); // Refresh data after update
     } catch (error) {
