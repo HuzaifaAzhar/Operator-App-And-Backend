@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const API_BASE_URL = 'http://192.168.100.119:3000';
+const API_BASE_URL = 'http://192.168.1.15:3000';
 
 const MachineOperationScreen = () => {
     const [operationValue, setOperationValue] = useState(null);
