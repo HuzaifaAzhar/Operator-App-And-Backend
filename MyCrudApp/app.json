@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Cake Vending Operator",
-    "slug": "Cake Vending Operator",
+    "slug": "CakeVendingOperator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,6 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.cakevendor.operator",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -27,6 +28,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "817aacc8-7921-434a-907b-7a9734bc4570"
+      }
     }
   }
 }
