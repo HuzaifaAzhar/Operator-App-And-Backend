@@ -15,7 +15,7 @@ const MonitoringOps = ({ navigation }) => {
   const fetchOpsValue = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://192.168.1.15:3000/fetch-ops-value?tableNumber=${selectedVending}`);
+      const response = await axios.get(`http://8.219.64.146:3001/fetch-ops-value?tableNumber=${selectedVending}`);
       const opsValue = response.data[0].TypeValue.toString();
       setOpsValue(opsValue);
       determineDisplayText(opsValue);

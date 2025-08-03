@@ -9,7 +9,6 @@ import MachineTestingScreen from './screens/MachineTestingScreen';
 import MachineOperationScreen from './screens/MachineOperationScreen';
 import MachineTransactionsScreen from './screens/MachineTransactionsScreen';
 // Import other screens...
-
 const Drawer = createDrawerNavigator();
 
 export default function App() {

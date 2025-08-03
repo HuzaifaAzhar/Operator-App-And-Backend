@@ -6,7 +6,7 @@ import {
 import axios from 'axios';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const API_BASE_URL = 'http://192.168.1.15:3000';
+const API_BASE_URL = 'http://8.219.64.146:3001';
 
 const MachineTestingScreen = () => {
     const [opsValue, setOpsValue] = useState(null);
