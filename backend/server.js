@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 const db = mysql.createConnection({
   host: 'rm-t4n55s7c50nax1164uo.mysql.singapore.rds.aliyuncs.com',
