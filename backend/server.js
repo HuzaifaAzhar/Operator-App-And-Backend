@@ -111,7 +111,7 @@ app.post('/update-operation-variable', (req, res) => {
         const tableName = getTableName(req);
         const { value } = req.body;
         if (!value) return res.status(400).send('Value is required.');
-        console.log(value);
+        //console.log(value);
 
         const query = `UPDATE ${tableName} SET TypeValue = ? WHERE ID = 69`;
         db.query(query, [value], (err, result) => {
@@ -194,6 +194,33 @@ app.post('/reset-ops-value', (req, res) => {
     }
 });
 
+app.post("/admin-login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (email === "anthonychai1955@gmail.com" && password === "Anthonychai$8815") {
+    res.json({ success: true });
+  } else {
+    res.json({ success: false });
+  }
+});
+
+
+app.post('/reset-mobile-value', (req, res) => {
+    try {
+        const tableName = getTableName(req);
+        const query = `UPDATE ${tableName} SET TypeValue = 0 WHERE ID = 88`;
+        db.query(query, (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.send('Testing value reset successfully');
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+});
+
 /** Update OPS value to any value (ID 73) */
 app.post('/update-ops-value', (req, res) => {
     try {
@@ -207,6 +234,41 @@ app.post('/update-ops-value', (req, res) => {
                 return res.status(500).send('Internal Server Error');
             }
             res.send('OPS value updated successfully');
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+});
+
+/**Fetch Mobile Value (ID 88) */
+app.get('/fetch-mobile-value', (req, res) => {
+    try {
+        const tableName = getTableName(req);
+        const query = `SELECT TypeValue FROM ${tableName} WHERE ID = 88`;
+        db.query(query, (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.json(result);
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+});
+/** Update Mobile Value (ID 88) */
+app.post('/update-mobile-value', (req, res) => {
+    try {
+        const tableName = getTableName(req);
+        const { value } = req.body;
+        if (!value) return res.status(400).send('Value is required.');
+        const query = `UPDATE ${tableName} SET TypeValue = ? WHERE ID = 88`;
+        db.query(query, [value], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.send('Operation Started Successfully');
         });
     } catch (error) {
         res.status(400).send(error.message);
