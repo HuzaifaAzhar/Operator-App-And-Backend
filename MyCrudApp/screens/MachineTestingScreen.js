@@ -15,7 +15,7 @@ const MachineTestingScreen = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [dropdownItems, setDropdownItems] = useState([]);
     const [selectedVending, setSelectedVending] = useState(null);
-
+    const [mobileValue, setMobileValue] = useState(null);
     useEffect(() => {
         fetchTableNames();
     }, []);
@@ -23,6 +23,7 @@ const MachineTestingScreen = () => {
     useEffect(() => {
         if (selectedVending) {
             fetchOPSValue();
+            fetchMobileValue();
         }
     }, [selectedVending]);
 
@@ -58,15 +59,59 @@ const MachineTestingScreen = () => {
             setLoading(false);
         }
     };
+    //fetch current mobile value
+      const fetchMobileValue = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`${API_BASE_URL}/fetch-mobile-value?tableNumber=${selectedVending}`);
+            if(response.data[0]?.TypeValue == 1){
+                setMobileValue("Moving Cake to W");
+            } else if(response.data[0]?.TypeValue == 2){
+                setMobileValue("Initializing Customer Doors");
+            } else if(response.data[0]?.TypeValue == 3){
+                setMobileValue("Initializing Cabinet Doors");
+            } else{
+                setMobileValue("No Test Running");
+            }
+            console.log("Mobile Value Fetched:", response.data[0]?.TypeValue);
+        } catch (error) {
+            console.error("Error fetching Machine Operation Value:", error);
+            Alert.alert("Error", "Failed to fetch Machine Operation value.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Reset Operation value to 1 with confirmation
-    const handleOperationResetToZero = async () => {
+    const handleMovingCake = async () => {
         Alert.alert(
-            "Confirm Reset",
-            "Are you sure you want to reset Operation value to 1?",
+            "Confirm Move Cake to W",
+            "Are you sure you want to move cake from X to W?",
             [
                 { text: "Cancel", style: "cancel" },
-                { text: "OK", onPress: async () => resetOperation() }
+                { text: "OK", onPress: async () => handleUpdateMobile(1) }
+            ]
+        );
+    };
+
+        const handleCustomerDoors = async () => {
+        Alert.alert(
+            "Confirm Initialize Customer Door",
+            "Are you sure you want to Initilize Customer Doors?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "OK", onPress: async () => handleUpdateMobile(2) }
+            ]
+        );
+    };
+
+        const handleCabinetDoors = async () => {
+        Alert.alert(
+            "Confirm Initialize Cabinet Doors",
+            "Are you sure you want to initialize Cabinet Doors?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "OK", onPress: async () => handleUpdateMobile(3) }
             ]
         );
     };
@@ -79,6 +124,18 @@ const MachineTestingScreen = () => {
             [
                 { text: "Cancel", style: "cancel" },
                 { text: "OK", onPress: async () => resetOPS() }
+            ]
+        );
+    };
+
+        // Reset OPS value to zero with confirmation
+    const handleResetTest = async () => {
+        Alert.alert(
+            "Confirm Reset",
+            "Are you sure you want to reset testing?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "OK", onPress: async () => resetTest() }
             ]
         );
     };
@@ -129,26 +186,40 @@ const MachineTestingScreen = () => {
         }
     };
 
-    // Update OPS value manually (User Input)
-    const handleUpdateOPS = async () => {
-        const value = parseInt(newOpsValue);
-        if (isNaN(value)) {
-            Alert.alert("Invalid Input", "Please enter a valid number.");
-            return;
-        }
-
+        const resetTest = async () => {
         try {
             setLoading(true);
-            await axios.post(`${API_BASE_URL}/update-ops-value?tableNumber=${selectedVending}`, { value });
-            setNewOpsValue(''); // Clear input after update
-            fetchOPSValue(); // Refresh after update
+            await axios.post(`${API_BASE_URL}/reset-mobile-value?tableNumber=${selectedVending}`);
+            fetchOPSValue(); // Refresh after reset
         } catch (error) {
-            console.error("Error updating OPS:", error);
-            Alert.alert("Error", "Failed to update OPS.");
+            console.error("Error resetting:", error);
+            Alert.alert("Error", "Failed to reset.");
         } finally {
             setLoading(false);
+            fetchMobileValue(); // Refresh after update
         }
     };
+
+    // Update OPS value manually (User Input)
+    const handleUpdateMobile = async (value) => {
+    console.log("Operation Value to be set:", value);
+    const parsedValue = parseInt(value);
+    if (isNaN(parsedValue)) {
+        Alert.alert("Invalid Input", "Please enter a valid number.");
+        return;
+    }
+
+    try {
+        setLoading(true);
+        await axios.post(`${API_BASE_URL}/update-mobile-value?tableNumber=${selectedVending}`, { value: parsedValue });
+    } catch (error) {
+        console.error("Error performing operation:", error);
+        Alert.alert("Error", "Failed to perform operation.");
+    } finally {
+        setLoading(false);
+        fetchMobileValue(); // Refresh after update
+    }
+};
 
     if (loading) return <ActivityIndicator size="large" color="blue" style={styles.loading} />;
 
@@ -168,9 +239,9 @@ const MachineTestingScreen = () => {
             />
             <Text style={styles.title}>Machine Testing</Text>
             <Text style={styles.valueText}>OPS Value: <Text style={styles.boldText}>{opsValue}</Text></Text>
-
+            <Text style={styles.valueText}>Test Operation Status: <Text style={styles.boldText}>{mobileValue}</Text></Text>
             {/* Update OPS Section */}
-            <View style={styles.inputContainer}>
+            {/* <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
                     placeholder="Enter OPS Value"
@@ -181,16 +252,25 @@ const MachineTestingScreen = () => {
                 <TouchableOpacity style={styles.updateButton} onPress={handleUpdateOPS}>
                     <Text style={styles.buttonText}>Update OPS</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
 
             {/* Buttons Section */}
             <TouchableOpacity style={styles.button} onPress={handleResetToZero}>
                 <Text style={styles.buttonText}>Clear OPS</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleOperationResetToZero}>
-                <Text style={styles.buttonText}>Reset Operation to 1</Text>
+            <TouchableOpacity style={styles.button} onPress={handleResetTest}>
+                <Text style={styles.buttonText}>Reset Test Operation</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleReset}>
+             <TouchableOpacity style={styles.buttonSecondary} onPress={handleMovingCake}>
+                <Text style={styles.buttonText}>Move Cake to W</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonSecondary} onPress={handleCustomerDoors}>
+                <Text style={styles.buttonText}>Initialize Customer Door</Text>
+            </TouchableOpacity>
+             <TouchableOpacity style={styles.buttonSecondary} onPress={handleCabinetDoors}>
+                <Text style={styles.buttonText}>Initialize Cabinet Doors</Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity style={styles.button} onPress={handleReset}>
                 <Text style={styles.buttonText}>Reset Operation to 1 & Clear OPS</Text>
             </TouchableOpacity>
 
@@ -200,7 +280,7 @@ const MachineTestingScreen = () => {
 
             <TouchableOpacity style={styles.buttonSecondary} onPress={() => Alert.alert("Testing Machine")}>
                 <Text style={styles.buttonText}>Test Machine</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 };

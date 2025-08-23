@@ -11,16 +11,48 @@ const MachineOperationScreen = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [dropdownItems, setDropdownItems] = useState([]);
     const [selectedVending, setSelectedVending] = useState(null);
+const getOperationStatus = (value) => {
+  switch (value) {
+    case "0":
+      return "No Operation";
+    case "00":
+      return "No Operation";
+    case "10":
+      return "Cabinet Door Opening";
+    case "30":
+      return "Taking a Bowl to the Take Away Area";
+    case "40":
+      return "Waiting — Customers Taken Away";
+    case "50":
+      return "Moving to Discard Area. Update W Qty.";
+    default:
+      return "Unknown Operation";
+  }
+};
 
     useEffect(() => {
         fetchTableNames();
     }, []);
 
-    useEffect(() => {
-        if (selectedVending) {
-            fetchOperationVariable();
-        }
-    }, [selectedVending]);
+   
+useEffect(() => {
+  let intervalId;
+
+  if (selectedVending) {
+    // Run immediately on vending change
+    fetchOperationVariable();
+
+    // Start polling every 5 seconds
+    intervalId = setInterval(() => {
+      fetchOperationVariable();
+    }, 5000);
+  }
+
+  // Cleanup when vending changes or component unmounts
+  return () => {
+    if (intervalId) clearInterval(intervalId);
+  };
+}, [selectedVending]);
 
     // Fetch table names for dropdown
     const fetchTableNames = async () => {
@@ -45,7 +77,8 @@ const MachineOperationScreen = () => {
     const fetchOperationVariable = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/fetch-test-value?tableNumber=${selectedVending}`);
+            console.log(`Fetching data for vending: ${selectedVending}`);
+            const response = await axios.get(`${API_BASE_URL}/fetch-ops-value?tableNumber=${selectedVending}`);
             setOperationValue(response.data[0]?.TypeValue);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -72,6 +105,7 @@ const MachineOperationScreen = () => {
             />
             <Text style={styles.title}>Machine Operation</Text>
             <Text style={styles.valueText}>Operation Value: {operationValue}</Text>
+            <Text style={styles.valueText}>Operation: {getOperationStatus(operationValue)}</Text>
         </View>
     );
 };
