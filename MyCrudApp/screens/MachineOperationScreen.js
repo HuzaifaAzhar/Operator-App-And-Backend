@@ -77,7 +77,7 @@ useEffect(() => {
     const fetchOperationVariable = async () => {
         try {
             setLoading(true);
-            console.log(`Fetching data for vending: ${selectedVending}`);
+            //console.log(`Fetching data for vending: ${selectedVending}`);
             const response = await axios.get(`${API_BASE_URL}/fetch-ops-value?tableNumber=${selectedVending}`);
             setOperationValue(response.data[0]?.TypeValue);
         } catch (error) {

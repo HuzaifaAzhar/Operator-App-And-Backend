@@ -68,6 +68,22 @@ app.get('/fetch-data', (req, res) => {
     }
 });
 
+/** Fetch Transactions data */
+app.get('/fetch-transactions', (req, res) => {
+    try {
+        const query = `SELECT * FROM paymentrecords`;
+        db.query(query, (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.json(results);
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+});
+
 /** Update a specific TypeValue by ID */
 app.post('/update-data', (req, res) => {
     try {
