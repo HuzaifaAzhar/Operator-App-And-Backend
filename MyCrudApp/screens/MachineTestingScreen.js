@@ -73,7 +73,7 @@ const MachineTestingScreen = () => {
             } else{
                 setMobileValue("No Test Running");
             }
-            console.log("Mobile Value Fetched:", response.data[0]?.TypeValue);
+            //console.log("Mobile Value Fetched:", response.data[0]?.TypeValue);
         } catch (error) {
             console.error("Error fetching Machine Operation Value:", error);
             Alert.alert("Error", "Failed to fetch Machine Operation value.");
@@ -202,7 +202,7 @@ const MachineTestingScreen = () => {
 
     // Update OPS value manually (User Input)
     const handleUpdateMobile = async (value) => {
-    console.log("Operation Value to be set:", value);
+    //console.log("Operation Value to be set:", value);
     const parsedValue = parseInt(value);
     if (isNaN(parsedValue)) {
         Alert.alert("Invalid Input", "Please enter a valid number.");
