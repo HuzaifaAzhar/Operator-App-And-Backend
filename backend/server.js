@@ -34,6 +34,89 @@ const getTableName = (req) => {
     return `cake_vending_${formattedNumber}`;
 };
 
+app.post('/update-all-product-details', async (req, res) => {
+    const connection = db;
+    const { quantities, expiries } = req.body;
+    const tableName = getTableName(req);
+
+    if (!quantities || !expiries || quantities.length !== 4 || expiries.length !== 4) {
+        return res.status(400).send("Arrays 'quantities' and 'expiries' must both have length 4.");
+    }
+
+    try {
+        await new Promise((resolve, reject) =>
+            connection.beginTransaction(err => err ? reject(err) : resolve())
+        );
+
+        for (let i = 0; i < 4; i++) {
+            const idQty = i + 1;
+            const idNext = i + 5;
+            const idExpiry = i + 13;
+
+            const getValue = (id) => {
+                return new Promise((resolve, reject) => {
+                    connection.query(`SELECT TypeValue FROM ${tableName} WHERE ID = ?`, [id], (err, results) => {
+                        if (err) return reject(err);
+                        const val = parseInt(results[0]?.TypeValue || "0");
+                        resolve(isNaN(val) ? 0 : val);
+                    });
+                });
+            };
+
+            const updateValue = (id, value) => {
+                return new Promise((resolve, reject) => {
+                    connection.query(`UPDATE ${tableName} SET TypeValue = ? WHERE ID = ?`, [value.toString(), id], (err) => {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+            };
+
+            const currentQty = await getValue(idQty);
+            const currentNext = await getValue(idNext);
+
+            const newQty = Math.min(parseInt(quantities[i]), 45);
+            const increase = Math.max(newQty - currentQty, 0);
+            const newNext = Math.max(currentNext - increase, 0);
+
+            // ✅ Determine expiry string
+            const rawExpiry = expiries[i]?.toString().trim();
+
+            let expiryStr;
+            if (/^\d{6}$/.test(rawExpiry)) {
+                // If it's already in YYMMDD format, trust it
+                expiryStr = rawExpiry;
+            } else {
+                // Otherwise, treat as number of days and clamp between 1-5
+                let expiryDays = parseInt(rawExpiry);
+                if (isNaN(expiryDays)) expiryDays = 1;
+                expiryDays = Math.max(1, Math.min(5, expiryDays));
+
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + expiryDays);
+
+                const yy = expiryDate.getFullYear().toString().slice(2);
+                const mm = String(expiryDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(expiryDate.getDate()).padStart(2, '0');
+                expiryStr = `${yy}${mm}${dd}`;
+            }
+
+            // ✅ Update all values
+            await updateValue(idQty, newQty);
+            await updateValue(idNext, newNext);
+            await updateValue(idExpiry, expiryStr);
+        }
+
+        await new Promise((resolve, reject) => connection.commit(err => err ? reject(err) : resolve()));
+        res.send("All product details updated successfully.");
+    } catch (error) {
+        await new Promise((resolve) => connection.rollback(() => resolve()));
+        console.error("Error updating product details:", error);
+        res.status(500).send("Failed to update product details.");
+    }
+});
+
+
 app.get('/gettables', (req, res) => {
     const query = 'SHOW TABLES';
     db.query(query, (err, results) => {
@@ -451,5 +534,5 @@ app.post('/update-price', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at http://8.219.64.146:${port}`);
 });
