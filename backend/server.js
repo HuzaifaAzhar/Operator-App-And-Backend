@@ -534,5 +534,5 @@ app.post('/update-price', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://8.219.64.146:${port}`);
+    console.log(`Server running at https://foodexpress.duckdns.org/mobile:${port}`);
 });

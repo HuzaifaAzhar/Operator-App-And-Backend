@@ -13,7 +13,7 @@ const StockReplenishment = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true); // Start loading indicator
-      const response = await axios.get(`http://8.219.64.146:3001/fetch-data?vending=${selectedVending}`);
+      const response = await axios.get(`https://foodexpress.duckdns.org/mobile/fetch-data?vending=${selectedVending}`);
       setData(response.data);
     } catch (error) {
       console.error(error);
@@ -30,7 +30,7 @@ const StockReplenishment = () => {
         return;
       }
   
-      await axios.post(`http://8.219.64.146:3001/update-data`, { id, value: newValue, vending: selectedVending });
+      await axios.post(`https://foodexpress.duckdns.org/mobile/update-data`, { id, value: newValue, vending: selectedVending });
       fetchData(); // Refresh data after update
       setIsEditing({ ...isEditing, [id]: false });
     } catch (error) {

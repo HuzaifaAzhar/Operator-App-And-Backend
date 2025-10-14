@@ -3,7 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet, Button, TextInput,
 import axios from 'axios';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-const API_BASE_URL = 'http://8.219.64.146:3001';
+const API_BASE_URL = 'https://foodexpress.duckdns.org/mobile';
 
 const StockReplenishmentScreen = () => {
     const [tableNames, setTableNames] = useState([]);
