@@ -12,7 +12,7 @@ const MachineTransactionsScreen = () => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get('http://8.219.64.146:3001/fetch-transactions');
+      const response = await axios.get('https://foodexpress.duckdns.org/mobile/fetch-transactions');
       setTransactions(response.data);
       setLoading(false);
     } catch (error) {

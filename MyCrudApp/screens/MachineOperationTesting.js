@@ -17,7 +17,7 @@ const MachineOperationTesting = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://8.219.64.146:3001/fetch-operation-variable?vending=${selectedVending}`);
+      const response = await axios.get(`https://foodexpress.duckdns.org/mobile/fetch-operation-variable?vending=${selectedVending}`);
       setOperationVariable(response.data[0].TypeValue.toString());
       setEditableValue(''); // Reset editableValue when fetching new data
     } catch (error) {
@@ -30,7 +30,7 @@ const MachineOperationTesting = () => {
   const handleUpdate = async () => {
     try {
 
-      await axios.post(`http://8.219.64.146:3001/update-operation-variable`, { value: editableValue, vending: selectedVending });
+      await axios.post(`https://foodexpress.duckdns.org/mobile/update-operation-variable`, { value: editableValue, vending: selectedVending });
       setIsEditing(false);
       fetchData(); // Refresh data after update
     } catch (error) {
