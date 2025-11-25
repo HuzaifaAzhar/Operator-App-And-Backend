@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "https://foodexpress.duckdns.org/mobile"; // update if needed
+const API_BASE_URL = "http://8.219.64.146:3001"; // update if needed
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
